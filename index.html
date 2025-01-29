@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition Test</title>
+</head>
+<body>
+
+    <h1>Speech Recognition Test</h1>
+    <p>Say your name and see if it gets detected!</p>
+    <button onclick="startRecognition()">Start Listening</button>
+
+    <script>
+        // Check if the browser supports SpeechRecognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("Your browser doesn't support Speech Recognition. Try Chrome!");
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true; // Keep listening
+        recognition.interimResults = false; // Only final results
+        recognition.lang = "en-US"; // Change if needed
+
+        function startRecognition() {
+            recognition.start();
+            console.log("Listening...");
+        }
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+            console.log("Heard:", transcript);
+
+            // Check if the spoken word matches the predefined word
+            const predefinedWord = ["nishu","help","run","fire","computer"]; // Change this to any name or word
+            if (transcript.includes(predefinedWord)) {
+                alert(`Someone called your name: ${predefinedWord}!`);
+                navigator.vibrate([300, 100, 300]); // Vibrate the phone
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+        };
+        // Request notification permission when page loads
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+
+recognition.onresult = (event) => {
+    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+    console.log("Heard:", transcript);
+
+    const predefinedWords = ["nish", "help", "fire"];
+    if (predefinedWords.some(word => transcript.includes(word))) {
+        new Notification("Alert!", { body: `Detected: ${transcript}` }); // Push notification
+        navigator.vibrate([300, 100, 300]); // Vibrate phone
+    }
+};   
+
+    </script>
+
+</body>
+</html>
