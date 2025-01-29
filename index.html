@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech Recognition Test</title>
 </head>
+
 <body>
 
     <h1>Speech Recognition Test</h1>
@@ -24,42 +26,59 @@
         recognition.lang = "en-US"; // Change if needed
 
         function startRecognition() {
+            if (Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.log("Notification permission granted.");
+            } else {
+                console.warn("Notification permission denied.");
+            }
+        });
+    }    
             recognition.start();
             console.log("Listening...");
+        }
+
+
+        // Request notification permission when page loads
+        if (Notification.permission !== "granted") {
+            Notification.requestPermission();
         }
 
         recognition.onresult = (event) => {
             const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
             console.log("Heard:", transcript);
 
-            // Check if the spoken word matches the predefined word
-            const predefinedWord = ["nishu","help","run","fire","computer"]; // Change this to any name or word
-            if (transcript.includes(predefinedWord)) {
-                alert(`Someone called your name: ${predefinedWord}!`);
-                navigator.vibrate([300, 100, 300]); // Vibrate the phone
+            const predefinedWords = ["nishu", "help", "fire", "run", "computer"];
+
+            if (predefinedWords.some(word => transcript.includes(word))) {
+                console.log("Match found:", transcript);
+
+
+                // Push notification
+                if (Notification.permission === "granted") {
+                    new Notification("Alert!", { body: `Detected: ${transcript}` });
+                } else {
+                    console.warn("Notifications not granted.");
+                }
+
+                // Vibrate phone
+                if (navigator.vibrate) {
+                    navigator.vibrate([300, 100, 300]);
+                    console.log("Vibration triggered.");
+                } else {
+                    console.warn("Vibration not supported.");
+                }
             }
         };
 
         recognition.onerror = (event) => {
             console.error("Speech recognition error:", event.error);
         };
-        // Request notification permission when page loads
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
-recognition.onresult = (event) => {
-    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
-    console.log("Heard:", transcript);
-
-    const predefinedWords = ["nish", "help", "fire"];
-    if (predefinedWords.some(word => transcript.includes(word))) {
-        new Notification("Alert!", { body: `Detected: ${transcript}` }); // Push notification
-        navigator.vibrate([300, 100, 300]); // Vibrate phone
-    }
-};   
-
     </script>
 
+
+
 </body>
+
 </html>
