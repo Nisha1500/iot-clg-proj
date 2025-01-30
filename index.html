@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Speech API Test</title>
+    <title>Speech Triggered Notification</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input, button { padding: 10px; font-size: 18px; margin: 5px; }
+        #trigger-words { width: 80%; }
         #result { font-size: 20px; margin-top: 20px; }
-        button { padding: 10px 20px; font-size: 18px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>Test Web Speech API</h1>
-    <button id="start-btn">Start Voice Recognition</button>
-    <p id="status">Click the button and start speaking...</p>
+    <h1>Speech-Triggered Notifications</h1>
+    <p>Enter trigger words (comma-separated):</p>
+    <input type="text" id="trigger-words" placeholder="e.g., hello, alert, help">
+    <button id="start-btn">Start Listening</button>
+    <p id="status">Click 'Start Listening' and speak...</p>
     <p id="result"></p>
 
     <script>
@@ -21,7 +24,7 @@
             alert("Speech Recognition Not Supported. Try in Chrome!");
         } else {
             const recognition = new webkitSpeechRecognition();
-            recognition.continuous = false;
+            recognition.continuous = true;
             recognition.interimResults = false;
             recognition.lang = "en-US";
 
@@ -30,9 +33,12 @@
             };
 
             recognition.onresult = (event) => {
-                let transcript = event.results[0][0].transcript;
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript.toLowerCase();
+                }
                 document.getElementById("result").innerText = "You said: " + transcript;
-                console.log("Recognized Speech:", transcript);
+                checkTriggerWords(transcript);
             };
 
             recognition.onerror = (event) => {
@@ -41,12 +47,45 @@
             };
 
             recognition.onend = () => {
-                document.getElementById("status").innerText = "Click the button and start speaking...";
+                document.getElementById("status").innerText = "Stopped. Click 'Start Listening' again.";
             };
 
             document.getElementById("start-btn").addEventListener("click", () => {
                 recognition.start();
             });
+
+            function checkTriggerWords(spokenText) {
+                let userWords = document.getElementById("trigger-words").value.toLowerCase().split(",");
+                userWords = userWords.map(word => word.trim());
+
+                userWords.forEach(word => {
+                    if (spokenText.includes(word) && word !== "") {
+                        console.log("Trigger word detected:", word);
+                        sendNotification("Alert!", `You said: "${word}"`);
+                        triggerVibration();
+                    }
+                });
+            }
+
+            function sendNotification(title, message) {
+                if ("Notification" in window) {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            new Notification(title, {
+                                body: message,
+                                icon: "https://via.placeholder.com/100"
+                            });
+                        }
+                    });
+                }
+            }
+
+            function triggerVibration() {
+                if ("vibrate" in navigator) {
+                    navigator.vibrate([300, 100, 300]); // Vibrates when a trigger word is spoken
+                    console.log("Device vibrated!");
+                }
+            }
         }
     </script>
 </body>
