@@ -1,16 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speech Triggered Notification</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
-        input, button { padding: 10px; font-size: 18px; margin: 5px; }
-        #trigger-words { width: 80%; }
-        #result { font-size: 20px; margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 18px;
+            margin: 5px;
+        }
+
+        #trigger-words {
+            width: 80%;
+        }
+
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+        }
     </style>
 </head>
+
 <body>
     <h1>Speech-Triggered Notifications</h1>
     <p>Enter trigger words (comma-separated):</p>
@@ -68,23 +87,24 @@
             }
 
             function sendNotification(title, message) {
-                if ("Notification" in window) {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === "granted") {
-                            new Notification(title, {body: message
-                            });
-                        }
-                    });
-                }
-            }
-
-            function triggerVibration() {
-                if ("vibrate" in navigator) {
-                    navigator.vibrate([300, 100, 300]); // Vibrates when a trigger word is spoken
-                    console.log("Device vibrated!");
-                }
+                console.log("Notification triggered: ", title, message); // Add this for debuggin
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        new Notification(title, { body: message });
+                    } else {
+                        console.log("Notification permission denied.");
+                    }
+                });
             }
         }
+
+        function triggerVibration() {
+            if ("vibrate" in navigator) {
+                navigator.vibrate([300, 100, 300]); // Vibrates when a trigger word is spoken
+                console.log("Device vibrated!");
+            }
+        }
+
     </script>
 </body>
 </html>
