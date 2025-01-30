@@ -71,9 +71,7 @@
                 if ("Notification" in window) {
                     Notification.requestPermission().then(permission => {
                         if (permission === "granted") {
-                            new Notification(title, {
-                                body: message,
-                                icon: "https://via.placeholder.com/100"
+                            new Notification(title, {body: message
                             });
                         }
                     });
